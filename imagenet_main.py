@@ -17,6 +17,10 @@ import resnet_run_loop
 from utils.flags import core as flags_core
 from utils.logs import logger
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # 将 TensorFlow 日志级别设置为 ERROR
+import logging
+tf.get_logger().setLevel(logging.ERROR)
+
 DEFAULT_IMAGE_SIZE = 224
 NUM_CHANNELS = 3
 NUM_CLASSES = 1001
@@ -26,7 +30,7 @@ NUM_IMAGES = {
     'validation': 50000,
 }
 
-_NUM_TRAIN_FILES = 1024
+_NUM_TRAIN_FILES = 5 #origin is 1024
 _SHUFFLE_BUFFER = 10000
 
 DATASET_NAME = 'ImageNet'
@@ -38,12 +42,14 @@ def get_filenames(is_training, data_dir):
   """Return filenames for dataset."""
   if is_training:
     return [
-        os.path.join(data_dir, 'train-%05d-of-01024' % i)
+        # os.path.join(data_dir, 'train-%05d-of-01024' % i)
+        os.path.join(data_dir, 'image_train_%05d-of-00005.tfrecord' % i)
         for i in range(_NUM_TRAIN_FILES)]
   else:
     return [
-        os.path.join(data_dir, 'validation-%05d-of-00128' % i)
-        for i in range(128)]
+        # os.path.join(data_dir, 'validation-%05d-of-00128' % i)
+        os.path.join(data_dir, 'image_test_%05d-of-00005.tfrecord' % i)
+        for i in range(5)] #origin is 128
 
 
 def _parse_example_proto(example_serialized):

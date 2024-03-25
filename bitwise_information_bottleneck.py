@@ -70,9 +70,9 @@ def alpha_update(alpha, origin_alpha, name):
     alpha = origin_alpha*(1-momentum) + momentum*tf.multiply(alpha, alpha_update_coef)
     
     # alpha quantization
-    round_back = beta
-    round_infer = tf.round(beta)
-    beta_round = round_back + tf.stop_gradient(round_infer - round_back)
+    round_back = alpha
+    round_infer = tf.round(alpha)
+    alpha_round = round_back + tf.stop_gradient(round_infer - round_back)
 
     return alpha
 

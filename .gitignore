@@ -1,2 +1,6 @@
 /models_pre
 *.zip
+
+/checkpoint_5b
+test_tf.py
+/data

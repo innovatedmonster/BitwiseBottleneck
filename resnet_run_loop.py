@@ -753,8 +753,8 @@ def define_resnet_flags(resnet_size_choices=None, dynamic_loss_scale=False,
           'If True do not train any parameters except for the final layer.'))
   flags.DEFINE_string(                                  # "/home/zxc/Liu/models-master-new/official/r1/resnet/model/"
       name='pretrained_model_checkpoint_path', short_name='pmcp',
-      default="/home/zxc/Liu/models-master-new/official/r1/resnet/model/",
-      # default=None,
+      # default="/home/NAS+quantization/BitwiseBottleneck/checkpoint_5b/",
+      default=None,
       help=flags_core.help_wrap(
           'If not None initialize all the network except the final layer with '
           'these values'))
