@@ -39,7 +39,7 @@ def define_base(data_dir=True, model_dir=True, clean=True, train_epochs=True,
 
   if data_dir:
     flags.DEFINE_string(                 # "/media/zxc/DATA/ImageNet/tf_records/train/"
-        name="data_dir", short_name="dd", default="/media/zxc/DATA/ImageNet/tf_records/train/",
+        name="data_dir", short_name="dd", default="/home/NAS+Quantization/BitwiseBottleneck/data/imagenet/train",
         help=help_wrap("The location of the input data."))
     key_flags.append("data_dir")
 

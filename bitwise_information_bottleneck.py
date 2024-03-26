@@ -65,8 +65,10 @@ def alpha_update(alpha, origin_alpha, name):
 
     origin_alpha = tf.cast(origin_alpha, tf.float32)
 
-    alpha_update_coef = tf.get_variable(name=name, shape=None, dtype=tf.float32,
-                                            initializer=tf.ones_like(alpha))
+    # alpha_update_coef = tf.get_variable(name=name, shape=None, dtype=tf.float32, #tf1
+                                            # initializer=tf.ones_like(alpha))
+    alpha_update_coef = tf.Variable(name=name, dtype=tf.float32, initial_value=tf.ones_like(alpha))
+                                            
     alpha = origin_alpha*(1-momentum) + momentum*tf.multiply(alpha, alpha_update_coef)
     
     # alpha quantization
@@ -244,8 +246,10 @@ def bitwise_information_bottleneck(x, name):
     rank = x.get_shape().ndims
     assert rank is not None
 
-    maximum = tf.reduce_max(tf.abs(x), list(range(1, rank)), keep_dims=True)
-    x_normal = (x/maximum) * 0.5 + tf.random_uniform(tf.shape(x), minval=-0.5 / quantization_maximum, maxval=0.5 / quantization_maximum)
+    # maximum = tf.reduce_max(tf.abs(x), list(range(1, rank)), keep_dims=True) #tf1
+    maximum = tf.reduce_max(tf.abs(x), list(range(1, rank)), keepdims=True)
+    # x_normal = (x/maximum) * 0.5 + tf.random_uniform(tf.shape(x), minval=-0.5 / quantization_maximum, maxval=0.5 / quantization_maximum) #tf1
+    x_normal = (x/maximum) * 0.5 + tf.random.uniform(tf.shape(x), minval=-0.5 / quantization_maximum, maxval=0.5 / quantization_maximum)
 
     round_backward = x_normal * quantization_maximum
     round_inference = tf.round(x_normal * quantization_maximum)
@@ -256,43 +260,45 @@ def bitwise_information_bottleneck(x, name):
     x = tf.multiply(x, x_sign)
     x = tf.reshape(x, [-1])
     # obtain the codebook of initial quantization
-    fdiv_back_0 = tf.div(x, 2.)
-    fdiv_forward_0 = tf.floordiv(x, 2.)
+    # fdiv_back_0 = tf.div(x, 2.) #tf1
+    fdiv_back_0 = tf.divide(x, 2.)
+    # fdiv_forward_0 = tf.floordiv(x, 2.) #tf1
+    fdiv_forward_0 = tf.math.floordiv(x, 2.)
     x_fdiv2 = fdiv_back_0 + tf.stop_gradient(fdiv_forward_0 - fdiv_back_0)
     xbit0 = x + tf.stop_gradient(tf.subtract(x, tf.multiply(x_fdiv2, 2.)) - x)
 
-    fdiv_back_1 = tf.div(x_fdiv2, 2.)
-    fdiv_forward_1 = tf.floordiv(x_fdiv2, 2.)
+    fdiv_back_1 = tf.divide(x_fdiv2, 2.)
+    fdiv_forward_1 = tf.math.floordiv(x_fdiv2, 2.)
     x_fdiv4 = fdiv_back_1 + tf.stop_gradient(fdiv_forward_1 - fdiv_back_1)
     xbit1 = x + tf.stop_gradient(tf.subtract(x_fdiv2, tf.multiply(x_fdiv4, 2.)) - x)
 
-    fdiv_back_2 = tf.div(x_fdiv4, 2.)
-    fdiv_forward_2 = tf.floordiv(x_fdiv4, 2.)
+    fdiv_back_2 = tf.divide(x_fdiv4, 2.)
+    fdiv_forward_2 = tf.math.floordiv(x_fdiv4, 2.)
     x_fdiv8 = fdiv_back_2 + tf.stop_gradient(fdiv_forward_2 - fdiv_back_2)
     xbit2 = x + tf.stop_gradient(tf.subtract(x_fdiv4, tf.multiply(x_fdiv8, 2.)) - x)
 
-    fdiv_back_3 = tf.div(x_fdiv8, 2.)
-    fdiv_forward_3 = tf.floordiv(x_fdiv8, 2.)
+    fdiv_back_3 = tf.divide(x_fdiv8, 2.)
+    fdiv_forward_3 = tf.math.floordiv(x_fdiv8, 2.)
     x_fdiv16 = fdiv_back_3 + tf.stop_gradient(fdiv_forward_3 - fdiv_back_3)
     xbit3 = x + tf.stop_gradient(tf.subtract(x_fdiv8, tf.multiply(x_fdiv16, 2.)) - x)
 
-    fdiv_back_4 = tf.div(x_fdiv16, 2.)
-    fdiv_forward_4 = tf.floordiv(x_fdiv16, 2.)
+    fdiv_back_4 = tf.divide(x_fdiv16, 2.)
+    fdiv_forward_4 = tf.math.floordiv(x_fdiv16, 2.)
     x_fdiv32 = fdiv_back_4 + tf.stop_gradient(fdiv_forward_4 - fdiv_back_4)
     xbit4 = x + tf.stop_gradient(tf.subtract(x_fdiv16, tf.multiply(x_fdiv32, 2.)) - x)
 
-    fdiv_back_5 = tf.div(x_fdiv32, 2.)
-    fdiv_forward_5 = tf.floordiv(x_fdiv32, 2.)
+    fdiv_back_5 = tf.divide(x_fdiv32, 2.)
+    fdiv_forward_5 = tf.math.floordiv(x_fdiv32, 2.)
     x_fdiv64 = fdiv_back_5 + tf.stop_gradient(fdiv_forward_5 - fdiv_back_5)
     xbit5 = x + tf.stop_gradient(tf.subtract(x_fdiv32, tf.multiply(x_fdiv64, 2.)) - x)
 
-    fdiv_back_6 = tf.div(x_fdiv64, 2.)
-    fdiv_forward_6 = tf.floordiv(x_fdiv64, 2.)
+    fdiv_back_6 = tf.divide(x_fdiv64, 2.)
+    fdiv_forward_6 = tf.math.floordiv(x_fdiv64, 2.)
     x_fdiv128 = fdiv_back_6 + tf.stop_gradient(fdiv_forward_6 - fdiv_back_6)
     xbit6 = x + tf.stop_gradient(tf.subtract(x_fdiv64, tf.multiply(x_fdiv128, 2.)) - x)
 
-    fdiv_back_7 = tf.div(x_fdiv128, 2.)
-    fdiv_forward_7 = tf.floordiv(x_fdiv128, 2.)
+    fdiv_back_7 = tf.divide(x_fdiv128, 2.)
+    fdiv_forward_7 = tf.math.floordiv(x_fdiv128, 2.)
     x_fdiv256 = fdiv_back_7 + tf.stop_gradient(fdiv_forward_7 - fdiv_back_7)
     xbit7 = x + tf.stop_gradient(tf.subtract(x_fdiv128, tf.multiply(x_fdiv256, 2.)) - x)
 
@@ -300,7 +306,7 @@ def bitwise_information_bottleneck(x, name):
     # restore the optimized quantized activation
     x_optimized = tf.matmul(xbit_stack, alpha)
 
-    x_optimized_backward = tf.div(tf.matmul(xbit_stack, alpha_backward), tf.cast(initial_bit_num, tf.float32))
+    x_optimized_backward = tf.divide(tf.matmul(xbit_stack, alpha_backward), tf.cast(initial_bit_num, tf.float32))
     x_output = x_optimized_backward + tf.stop_gradient(x_optimized - x_optimized_backward)
 
     x_output = tf.reshape(x_output, shape=[-1, x_shape[-3], x_shape[-2], x_shape[-1]])

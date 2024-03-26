@@ -12,8 +12,8 @@ _RANDOM_SEED = 0
 # 数据块数量
 _NUM_SHARDS = 5
 # 数据集路径
-DATASET_DIR = "/home/data/imagenet/train/"
-OUTPUT_DIR = "/home/NAS+quantization/BitwiseBottleneck/data/imagenet/train/"
+DATASET_DIR = "/home/datasets/imagenet/train/"
+OUTPUT_DIR = "/home/NAS+Quantization/BitwiseBottleneck/data/imagenet/train/"
 # 生成的标签文件. 注意这里'生成'的意思, 数据图片是使用各自所在文件夹作为自己的
 # 标签, '生成'的意思是把文件夹名字映射为数字.
 LABELS_FILENAME = "lec8_2_produced_labels/labels.txt"#不使用
@@ -56,42 +56,42 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir):
     #计算每个数据块有多少数据
     num_per_shard = int(len(filenames) / _NUM_SHARDS)
     with tf.Graph().as_default():
-        # with tf.Session() as sess: #tf1
-        for shard_id in range(_NUM_SHARDS):
-            #定义tfrecord文件的路径+名字
-            output_filename = _get_dataset_filename(
-                dataset_dir, split_name, shard_id)
-            # with tf.python_io.TFRecordWriter(
-            with tf.io.TFRecordWriter(
-                    output_filename) as tfrecord_writer:  # 固定套路
-                #每一个数据块的开始位置
-                start_ndx = shard_id * num_per_shard
-                #每一个数据块的最后位置
-                end_ndx = min((shard_id + 1) * num_per_shard,
-                                len(filenames))
-                for i in range(start_ndx, end_ndx):
-                    try:  #如果遇到损坏的图片文件, 则直接跳过不做处理
-                        sys.stdout.write(
-                            '\r>> Convert image %d/%d shard %d' %
-                            (i + 1, len(filenames), shard_id))
-                        sys.stdout.flush()
-                        #读取图片
-                        # image_data = tf.gfile.FastGFile( #tf1
-                        image_data = tf.io.gfile.GFile(
-                            filenames[i], 'rb').read()
-                        #获得图片的类别名称
-                        class_name = os.path.basename(
-                            os.path.dirname(filenames[i]))
-                        #找到类别名称对应的id
-                        class_id = class_names_to_ids[class_name]
-                        #生成tfrecord文件
-                        example = image_to_tfexample(
-                            image_data, b'jpg', class_id)
-                        tfrecord_writer.write(example.SerializeToString())
-                    except IOError as e:
-                        print('Could not read:', filenames[i])
-                        print('Error:', e)
-                        print('Skip it\n')
+        with tf.Session() as sess: #tf1
+            for shard_id in range(_NUM_SHARDS):
+                #定义tfrecord文件的路径+名字
+                output_filename = _get_dataset_filename(
+                    dataset_dir, split_name, shard_id)
+                # with tf.python_io.TFRecordWriter(
+                with tf.io.TFRecordWriter(
+                        output_filename) as tfrecord_writer:  # 固定套路
+                    #每一个数据块的开始位置
+                    start_ndx = shard_id * num_per_shard
+                    #每一个数据块的最后位置
+                    end_ndx = min((shard_id + 1) * num_per_shard,
+                                    len(filenames))
+                    for i in range(start_ndx, end_ndx):
+                        try:  #如果遇到损坏的图片文件, 则直接跳过不做处理
+                            sys.stdout.write(
+                                '\r>> Convert image %d/%d shard %d' %
+                                (i + 1, len(filenames), shard_id))
+                            sys.stdout.flush()
+                            #读取图片
+                            image_data = tf.gfile.FastGFile( #tf1
+                            # image_data = tf.io.gfile.GFile(
+                                filenames[i], 'rb').read()
+                            #获得图片的类别名称
+                            class_name = os.path.basename(
+                                os.path.dirname(filenames[i]))
+                            #找到类别名称对应的id
+                            class_id = class_names_to_ids[class_name]
+                            #生成tfrecord文件
+                            example = image_to_tfexample(
+                                image_data, b'jpg', class_id)
+                            tfrecord_writer.write(example.SerializeToString())
+                        except IOError as e:
+                            print('Could not read:', filenames[i])
+                            print('Error:', e)
+                            print('Skip it\n')
 
     sys.stdout.write('\n')
     sys.stdout.flush()
@@ -104,8 +104,8 @@ def _dataset_exists(dataset_dir):
             #定义tfrecord文件的路径+名字
             output_filename = _get_dataset_filename(dataset_dir, split_name,
                                                     shard_id)
-        # if not tf.gfile.Exists(output_filename): #tf1
-        if not tf.io.gfile.exists(output_filename):
+        if not tf.gfile.Exists(output_filename): #tf1
+        # if not tf.io.gfile.exists(output_filename):
             return False
     return True
 
